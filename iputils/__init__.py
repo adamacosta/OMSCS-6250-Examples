@@ -1,7 +1,20 @@
 """Utilities for handling IP addresses.
 
-This module provides classes, data structures, and parsers to make it 
-easy to manipulate, match, and route IP addresses.
+Exports:
+
+Classes
+-------
+IP -- A bit representation of an IP address that supports longest prefix
+    matching.
+
+CIDRBlock -- Converts an IP address in CIDR notation to a range of valid 
+    addresses matching the block.
+
+Functions
+---------
+ip_parser([string]) -> [IP|CIDRBlock]
+    Parses a string in dotted quad format to either an IP object or a 
+    CIDRBlock object depending upon the presence of a trailing mask.
 """
 
 import re
@@ -78,22 +91,44 @@ class IP:
 	def lpm(self, other):
 		"""Return the longest prefix match with a CIDR block."""
 		assert(isinstance(other, CIDRBlock))
-		if (self.bits ^ other.first).index(True) >= other.mask:
-			return other.mask
+		if (self.bits ^ other.first).index(True) >= other._mask:
+			return other._mask
 		else:
 			return 0
 
 class CIDRBlock:
+	"""Return a CIDRBlock object.
+
+	Attributes
+	----------
+	first -- First valid IP address in the range.
+	last -- Last valid IP address in the range.
+	bitmask -- Bit representation of subnet mask
+
+	Methods
+	-------
+	tostring() -> string
+	getrange() -> (string, string)
+	getmask() -> string
+	matches() -> boolean
+	"""
 	def __init__(self, addr):
+		"""Initialize a CIDRBlock object.
+
+		The argument to CIDRBlock must be a string in dotted quad format
+		consisting of four integers in the range 0 to 255, each separated 
+		by a single dot, with a trailing slash and subnet mask length that 
+		must be in the range 0 to 32.
+		"""
 		assert(_is_valid_cidr(addr))
 		self.first = _dotted_quad_to_bits(addr.split('/')[0])
-		self.mask = int(addr.split('/')[1])
-		self.bitmask = bitarray('1'*self.mask + '0'*(32 - self.mask))
+		self._mask = int(addr.split('/')[1])
+		self.bitmask = bitarray('1'*self._mask + '0'*(32 - self._mask))
 		self.last = self.first | ~self.bitmask
 
 	def tostring(self):
 		"""Return string representation in CIDR format."""
-		return _bits_to_dotted_quad(self.first) + '/' + str(self.mask)
+		return _bits_to_dotted_quad(self.first) + '/' + str(self._mask)
 
 	def getrange(self):
 		"""Return the first and last address in the block."""
@@ -106,7 +141,7 @@ class CIDRBlock:
 	def matches(self, other):
 		"""Return True if IP address is in block."""
 		assert(isinstance(other, IP))
-		return self.first[:self.mask] == other.getbits()[:self.mask]
+		return self.first[:self._mask] == other.getbits()[:self._mask]
 
 class trie:
 	# TODO: implement a trie
