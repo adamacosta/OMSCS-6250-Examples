@@ -5,40 +5,30 @@ This algorithm is used in the distance-vector protocol for
 finding paths between routers in a computer network.
 """
 
+
 class Graph:
-	"""
-	class Graph
-	
-	params
-	------
-	nodes: a list of names for nodes in the graph 
-	edges: a list of lists of the form [u, v, w] where w is the weight.
+	"""Purpose-specific.
+
+	This is only for demonstration and not a general-purpose graph.
 	"""
 	def __init__(self, nodes, edges):
-		assert(len(nodes) > 1)
-		assert(len(edges) > 1)
 		self.nodes = nodes
 		self.edges = edges
 
 	def bellman_ford(self, source):
-		distance = {}
-		predecessor = {}
-		for node in self.nodes:
-			distance[node] = 10 ** 100
-			predecessor[node] = None
+		distance = dict(zip(self.nodes, 
+			               [sum(self.edges.values()) + 1] * len(self.nodes)))
 		distance[source] = 0
+		print distance
 		for node in self.nodes:
 			for edge in self.edges:
-				if distance[edge[0]] + edge[2] < distance[edge[1]]:
-					distance[edge[1]] = distance[edge[0]] + edge[2]
-					predecessor[edge[1]] = edge[0]
-		return distance, predecessor
+				if distance[edge[0]] + self.edges[edge] < distance[edge[1]]:
+					distance[edge[1]] = distance[edge[0]] + self.edges[edge] 
+			print distance
+
 
 if __name__ == '__main__':
-	V = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']
-	E = [['a','b', 1], ['a','c', 3], ['b','c', 2],
-	     ['b','d', 6], ['b','h', 1], ['c','d', 5],
-	     ['d','e', 4], ['e','f', 2], ['e','g', 2],
-	     ['f','h', 5], ['h','i', 4]]
-	G = Graph(V, E)
-	print G.bellman_ford(source='a')
+	edges = ['ab', 'ac', 'bc', 'bd', 'bh', 'cd', 'de', 'ef', 'eg', 'fh', 'hi']
+	weights = [1, 3, 2, 6, 1, 5, 4, 2, 2, 5, 4]
+	G = Graph(set(''.join(edges)), dict(zip(edges, weights)))
+	G.bellman_ford(source='a')
