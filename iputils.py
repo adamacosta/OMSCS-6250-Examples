@@ -7,9 +7,8 @@ class IP:
 	def __init__(self, addr):
 		assert(re.match('([0-9]{1,3}\.){3}[0-9]{1,3}', addr))
 		self.ip = addr
-		self.bits = bitarray()
-		for octet in list(map(int, self.ip.split('.'))):
-			self.bits.extend(bitarray(binary_repr(octet, width=8)))
+		self.bits = bitarray(''.join(list(map(binary_repr, 
+			                         list(map(int, addr.split('.'))), [8]*4))))
 
 	def tostring(self):
 		return self.ip
