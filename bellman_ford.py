@@ -16,6 +16,7 @@ class Graph:
 		self.edges = edges
 
 	def bellman_ford(self, source):
+		# Sum of all edges + 1 serves as 'infinity'
 		distance = dict(zip(self.nodes, 
 			               [sum(self.edges.values()) + 1] * len(self.nodes)))
 		distance[source] = 0
